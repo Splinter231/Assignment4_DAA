@@ -94,7 +94,7 @@ public class TarjanSCC {
     }
 
     public static void main(String[] args) throws Exception {
-        Graph g = Graph.fromJson("data/small_1.json");
+        Graph g = Graph.fromJson("data_final/small_1.json");
         TarjanSCC tarjan = new TarjanSCC(g);
         tarjan.run();
         tarjan.printSummary();

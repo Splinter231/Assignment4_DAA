@@ -5,114 +5,70 @@ import com.google.gson.GsonBuilder;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 public class RandomGraphGenerator {
 
-    private static class Edge {
-        int u, v, w;
-        Edge(int u, int v, int w) {
-            this.u = u;
-            this.v = v;
-            this.w = w;
-        }
-    }
-
-    private static class GraphData {
-        boolean directed = true;
-        int n;
-        List<Edge> edges;
-        int source;
-        String weight_model = "edge";
-    }
-
     private static final Random rand = new Random();
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public static void main(String[] args) throws IOException {
-        generateAllDatasets("data");
+        new java.io.File("data_final").mkdirs();
+
+        generateCategory("small", 6, 10, 3, 0.15, 0.25, 1);
+        generateCategory("medium", 10, 20, 3, 0.25, 0.40, 3);
+        generateCategory("large", 20, 50, 3, 0.45, 0.65, 6);
+
+        System.out.println("9 datasets generated under /data_final/");
     }
 
-    public static void generateAllDatasets(String outputDir) throws IOException {
-        Files.createDirectories(Path.of(outputDir));
-
-        StringBuilder summary = new StringBuilder("=== DATASET SUMMARY ===\n");
-
-        generateCategory(outputDir, "small", 6, 10, 3, summary);
-        generateCategory(outputDir, "medium", 10, 20, 3, summary);
-        generateCategory(outputDir, "large", 20, 50, 3, summary);
-
-        try (FileWriter fw = new FileWriter(outputDir + "/summary.txt")) {
-            fw.write(summary.toString());
-        }
-
-        System.out.println("All datasets generated successfully in /data");
-    }
-
-    private static void generateCategory(String dir, String label, int minNodes, int maxNodes,
-                                         int count, StringBuilder summary) throws IOException {
+    private static void generateCategory(String prefix, int minN, int maxN, int count,
+                                         double minDensity, double maxDensity, int maxCycles)
+            throws IOException {
 
         for (int i = 1; i <= count; i++) {
-            int n = rand.nextInt(maxNodes - minNodes + 1) + minNodes;
+            int n = rand.nextInt(maxN - minN + 1) + minN;
+            double density = minDensity + rand.nextDouble() * (maxDensity - minDensity);
 
-            double density;
-            if (label.equals("small")) density = rand.nextDouble(0.1, 0.25);
-            else if (label.equals("medium")) density = rand.nextDouble(0.25, 0.45);
-            else density = rand.nextDouble(0.45, 0.75);
+            List<Map<String, Object>> edges = new ArrayList<>();
+            int possible = n * (n - 1);
+            int edgeCount = (int) (possible * density);
 
-            int cycles;
-            if (label.equals("small")) cycles = rand.nextInt(3);
-            else if (label.equals("medium")) cycles = rand.nextInt(2, 5);
-            else cycles = rand.nextInt(4, 8);
+            for (int k = 0; k < edgeCount; k++) {
+                int u = rand.nextInt(n);
+                int v = rand.nextInt(n);
+                if (u == v) continue;
 
-            GraphData g = generateGraph(n, density, cycles);
+                boolean allowCycle = switch (prefix) {
+                    case "small" -> rand.nextDouble() < 0.15;
+                    case "medium" -> rand.nextDouble() < 0.35;
+                    case "large" -> rand.nextDouble() < 0.6;
+                    default -> false;
+                };
+                if (!allowCycle && u > v) continue;
 
-            String filename = String.format("%s/%s_%d.json", dir, label, i);
-            try (FileWriter fw = new FileWriter(filename)) {
-                gson.toJson(g, fw);
+                int w = rand.nextInt(1, 10);
+                Map<String, Object> e = new HashMap<>();
+                e.put("u", u);
+                e.put("v", v);
+                e.put("w", w);
+                edges.add(e);
             }
 
-            summary.append(String.format(Locale.US,
-                    "%s_%d.json → n=%d, edges=%d, density=%.2f, cycles=%d\n",
-                    label, i, g.n, g.edges.size(), density, cycles));
+            Map<String, Object> graph = new LinkedHashMap<>();
+            graph.put("directed", true);
+            graph.put("n", n);
+            graph.put("edges", edges);
+            graph.put("source", rand.nextInt(n));
+            graph.put("weight_model", "edge");
 
-            System.out.printf("Generated %-10s | nodes=%2d | edges=%3d | cycles=%d\n",
-                    filename, g.n, g.edges.size(), cycles);
-        }
-    }
-
-    private static GraphData generateGraph(int n, double density, int cycles) {
-        GraphData g = new GraphData();
-        g.n = n;
-        g.source = rand.nextInt(n);
-        g.edges = new ArrayList<>();
-
-        int maxEdges = n * (n - 1);
-        int targetEdges = (int) (density * maxEdges);
-
-        Set<String> used = new HashSet<>();
-
-        for (int i = 0; i < targetEdges; i++) {
-            int u = rand.nextInt(n);
-            int v = rand.nextInt(n);
-            if (u == v || used.contains(u + "-" + v)) continue;
-            int w = rand.nextInt(9) + 1;
-            g.edges.add(new Edge(u, v, w));
-            used.add(u + "-" + v);
-        }
-
-        for (int i = 0; i < cycles; i++) {
-            int a = rand.nextInt(n);
-            int b = rand.nextInt(n);
-            if (a != b && !used.contains(b + "-" + a)) {
-                int w = rand.nextInt(5) + 1;
-                g.edges.add(new Edge(b, a, w));
-                used.add(b + "-" + a);
+            String filename = String.format("data_final/%s_%d.json", prefix, i);
+            try (FileWriter writer = new FileWriter(filename)) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                gson.toJson(graph, writer);
             }
-        }
 
-        return g;
+            System.out.printf("%s_%d.json → n=%d, edges=%d, density=%.2f%n",
+                    prefix, i, n, edges.size(), density);
+        }
     }
 }

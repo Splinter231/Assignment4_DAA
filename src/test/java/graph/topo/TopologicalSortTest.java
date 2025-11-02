@@ -10,7 +10,7 @@ public class TopologicalSortTest {
 
     @Test
     public void testTopologicalOrderOnCondensedGraph() throws Exception {
-        Graph g = Graph.fromJson("data/small_1.json");
+        Graph g = Graph.fromJson("data_final/large_3.json");
         TarjanSCC tarjan = new TarjanSCC(g);
         tarjan.run();
 

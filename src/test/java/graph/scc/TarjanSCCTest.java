@@ -8,7 +8,7 @@ public class TarjanSCCTest {
 
     @Test
     public void testTarjanSccDetection() throws Exception {
-        Graph g = Graph.fromJson("data/medium_1.json");
+        Graph g = Graph.fromJson("data_final/medium_1.json");
         TarjanSCC tarjan = new TarjanSCC(g);
         tarjan.run();
 

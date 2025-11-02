@@ -74,7 +74,7 @@ public class CondensationGraphBuilder {
     }
 
     public static void main(String[] args) throws Exception {
-        Graph g = Graph.fromJson("data/medium_1.json");
+        Graph g = Graph.fromJson("data_final/medium_1.json");
         TarjanSCC tarjan = new TarjanSCC(g);
         tarjan.run();
 
