@@ -1,0 +1,12 @@
+{
+  "dataset": "medium_1.json",
+  "vertices": 18,
+  "edges": 70,
+  "scc_count": 3,
+  "scc_time_ms": 0.0234,
+  "topo_push": 0,
+  "topo_pop": 0,
+  "shortest_time_ms": 0.0194,
+  "longest_time_ms": 0.0173,
+  "time_ms": 0.0173
+}

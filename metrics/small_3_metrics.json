@@ -1,0 +1,12 @@
+{
+  "dataset": "small_3.json",
+  "vertices": 7,
+  "edges": 5,
+  "scc_count": 7,
+  "scc_time_ms": 0.0111,
+  "topo_push": 7,
+  "topo_pop": 7,
+  "shortest_time_ms": 0.0141,
+  "longest_time_ms": 0.02,
+  "time_ms": 0.02
+}

@@ -1,0 +1,12 @@
+{
+  "dataset": "large_2.json",
+  "vertices": 48,
+  "edges": 990,
+  "scc_count": 1,
+  "scc_time_ms": 0.0896,
+  "topo_push": 0,
+  "topo_pop": 0,
+  "shortest_time_ms": 0.1732,
+  "longest_time_ms": 0.2008,
+  "time_ms": 0.2008
+}
